@@ -3,3 +3,4 @@ plugin/.classpath
 plugin/.project
 assinador-serpro/
 plugin/target/
+.vscode/settings.json

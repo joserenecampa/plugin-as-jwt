@@ -6,11 +6,15 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 
+import org.apache.commons.codec.binary.Base64;
 import org.demoiselle.signer.core.extension.BasicCertificate;
 import org.demoiselle.signer.core.keystore.loader.KeyStoreLoader;
 import org.demoiselle.signer.core.keystore.loader.factory.KeyStoreLoaderFactory;
-import org.demoiselle.signer.core.util.Base64Utils;
+import org.demoiselle.signer.cryptography.Digest;
+import org.demoiselle.signer.cryptography.DigestAlgorithmEnum;
+import org.demoiselle.signer.cryptography.factory.DigestFactory;
 import org.demoiselle.signer.policy.impl.cades.SignerAlgorithmEnum;
 import org.demoiselle.signer.policy.impl.cades.factory.PKCS1Factory;
 import org.demoiselle.signer.policy.impl.cades.pkcs1.PKCS1Signer;
@@ -37,22 +41,42 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
     @Override
     public JWTResponse doCommand(JWTRequest request) throws Throwable {
         try {
-            String headerJwt = "{\"alg\":\"RS512\",\"typ\":\"JWT\"}";
             String alias = this.getAlias();
 			X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
 			BasicCertificate bc = new BasicCertificate(cert);
-            String bodyJwt = "{\"sub\":\"" + bc.getICPBRCertificatePF().getCPF() + "\",\"name\":\"" + bc.getName() + "\"}";
+            Digest digest = DigestFactory.getInstance().factory();
+            digest.setAlgorithm(DigestAlgorithmEnum.SHA_1);
+            String certSha1 = base64Codec(digest.digest(cert.getEncoded()));
+            long now = System.currentTimeMillis() / 1000L;
+            String headerJwt = "{"+
+                            "\"alg\":\"RS512\","+
+                            "\"typ\":\"JWT\","+
+                            "\"x5t\":\"" + certSha1 + "\""+
+                            "}";
+            String bodyJwt = "{"+
+                             "\"iss\":\"Assinador SERPRO Websocket Service\"," +
+                             "\"iat\":\"" + now +  "\"," +
+                             "\"nbf\":\"" + now +  "\"," +
+                             "\"exp\":\"" + (now+3600) +  "\"," +
+                             "\"prn\":\"" + bc.getICPBRCertificatePF().getCPF() + "\","+
+                             "\"sub\":\"" + bc.getName() + "\""+
+                             "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
             signer.setAlgorithm(SignerAlgorithmEnum.SHA512withRSA);
             signer.setPrivateKey((PrivateKey)this.keyStore.getKey(alias, this.pass));
-            String toSigner = Base64Utils.base64Encode(headerJwt.getBytes())+"."+Base64Utils.base64Encode(bodyJwt.getBytes());
+            String toSigner = base64Codec(headerJwt.getBytes())+"."+base64Codec(bodyJwt.getBytes());
             byte[] signatureJwt = signer.doDetachedSign(toSigner.getBytes());
-            response.setJwt(toSigner+"."+Base64Utils.base64Encode(signatureJwt));
+            response.setJwt(toSigner+"."+base64Codec(signatureJwt));
+            response.setCertificate(base64Codec(cert.getEncoded()));
         } catch (Throwable error) {
             logger.error("Erro ao assinar token", error);
             response.setJwt(error.getMessage());
         }
         return response;
+    }
+
+    private String base64Codec(byte[] content) {
+        return Base64.encodeBase64URLSafeString(content);
     }
 
     private void loadKeyStore() {

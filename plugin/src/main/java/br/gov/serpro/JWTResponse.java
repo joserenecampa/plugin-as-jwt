@@ -4,7 +4,8 @@ import org.demoiselle.signer.serpro.desktop.web.requestResponse.Response;
 
 public class JWTResponse extends Response {
 
-    private String jwt = "OK";
+    private String jwt = "";
+    private String certificate = "";
     
     public JWTResponse() {
         super();
@@ -20,5 +21,13 @@ public class JWTResponse extends Response {
 
     public void setJwt(String jwt) {
         this.jwt = jwt;
+    }
+
+    public String getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(String certificate) {
+        this.certificate = certificate;
     }
 }
