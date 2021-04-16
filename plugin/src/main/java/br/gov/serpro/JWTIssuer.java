@@ -55,10 +55,11 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                             "}";
             String bodyJwt = "{"+
                              "\"iss\":\"Assinador SERPRO Websocket Service\"," +
-                             "\"iat\":\"" + now +  "\"," +
-                             "\"nbf\":\"" + now +  "\"," +
-                             "\"exp\":\"" + (now+3600) +  "\"," +
+                             "\"iat\":" + now +  "," +
+                             "\"nbf\":" + now +  "," +
+                             "\"exp\":" + (now+3600) +  "," +
                              "\"prn\":\"" + bc.getICPBRCertificatePF().getCPF() + "\","+
+                             ""+(request.isWithCert()?"\"crt\":\"" + base64Codec(cert.getEncoded()) + "\",":"")+
                              "\"sub\":\"" + bc.getName() + "\""+
                              "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
