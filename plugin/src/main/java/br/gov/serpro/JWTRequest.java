@@ -5,6 +5,7 @@ import org.demoiselle.signer.serpro.desktop.web.requestResponse.Request;
 public class JWTRequest extends Request {
 
     private boolean withCert = false;
+    private boolean withData = false;
     private String sys = "";
 
     public boolean isWithCert() {
@@ -21,5 +22,13 @@ public class JWTRequest extends Request {
 
     public void setSys(String sys) {
         this.sys = sys;
+    }
+
+    public boolean isWithData() {
+        return withData;
+    }
+
+    public void setWithData(boolean withData) {
+        this.withData = withData;
     }
 }

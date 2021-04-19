@@ -50,9 +50,6 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             if (request.getHostConnectedPrefix() != null && !request.getHostConnectedPrefix().isEmpty()) {
                 JWTIssuer.ACAO = JWTIssuer.ACAO + " - " + request.getHostConnectedPrefix();
             }
-            if (request.getSys() != null && !request.getSys().isEmpty()) {
-                JWTIssuer.ACAO = JWTIssuer.ACAO + " (" + request.getSys() + ")";
-            }
             String alias = this.getAlias();
             X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
             BasicCertificate bc = new BasicCertificate(cert);
@@ -66,10 +63,12 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                     + "\"iat\":" + now + ","
                     + "\"nbf\":" + now + "," 
                     + "\"exp\":" + (now + 3600) + "," 
-                    + "\"prn\":\"" + bc.getICPBRCertificatePF().getCPF() + "\"," 
-                    + "" + (request.isWithCert() ? "\"crt\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
-                    + "\"sub\":\"" + bc.getName() + "\"," 
-                    + "" + (request.getSys()!=null&&!request.getSys().trim().isEmpty() ? "\"sys\":\"" + request.getSys() + "\"," : "") 
+                    + "" + (request.isWithData() ? "\"prn\":\"" + bc.getICPBRCertificatePF().getCPF() + "\"," : "") 
+                    + "" + (request.isWithData() ? "\"sub\":\"" + bc.getName() + "\"," : "") 
+                    + "" + (request.isWithData() ? "\"email\":\"" + bc.getEmail() + "\"," : "") 
+                    + "" + (request.isWithData() ? "\"nascimento\":\"" + bc.getICPBRCertificatePF().getBirthDate() + "\"," : "") 
+                    + "" + (request.isWithData()&&request.isWithCert() ? "\"crt\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
+                    + "" + (request.isWithData()&&request.getSys()!=null&&!request.getSys().trim().isEmpty() ? "\"sys\":\"" + request.getSys() + "\"," : "") 
                     + "\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
                     + "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
