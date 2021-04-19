@@ -56,8 +56,16 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             Digest digest = DigestFactory.getInstance().factory();
             digest.setAlgorithm(DigestAlgorithmEnum.SHA_1);
             String certSha1 = base64Codec(digest.digest(cert.getEncoded()));
+            digest = DigestFactory.getInstance().factory();
+            digest.setAlgorithm(DigestAlgorithmEnum.SHA_256);
+            String certSha2 = base64Codec(digest.digest(cert.getEncoded()));
             long now = System.currentTimeMillis() / 1000L;
-            String headerJwt = "{" + "\"alg\":\"RS512\"," + "\"typ\":\"JWT\"," + "\"x5t\":\"" + certSha1 + "\"" + "}";
+            String headerJwt = "{" 
+                + "\"alg\":\"RS512\"," 
+                + "\"typ\":\"JWT\"," 
+                + "\"x5t\":\"" + certSha1 + "\"," 
+                + "\"x5t#S256\":\"" + certSha2 + "\"" 
+                + "}";
             String bodyJwt = "{" 
                     + "\"iss\":\"Assinador SERPRO Websocket Service\"," 
                     + "\"iat\":" + now + ","
@@ -67,7 +75,7 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                     + "" + (request.isWithData() ? "\"sub\":\"" + bc.getName() + "\"," : "") 
                     + "" + (request.isWithData() ? "\"email\":\"" + bc.getEmail() + "\"," : "") 
                     + "" + (request.isWithData() ? "\"nascimento\":\"" + bc.getICPBRCertificatePF().getBirthDate() + "\"," : "") 
-                    + "" + (request.isWithData()&&request.isWithCert() ? "\"crt\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
+                    + "" + (request.isWithData()&&request.isWithCert() ? "\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
                     + "" + (request.isWithData()&&request.getSys()!=null&&!request.getSys().trim().isEmpty() ? "\"sys\":\"" + request.getSys() + "\"," : "") 
                     + "\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
                     + "}";
