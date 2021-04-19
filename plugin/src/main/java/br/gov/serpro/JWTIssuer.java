@@ -54,30 +54,26 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
             BasicCertificate bc = new BasicCertificate(cert);
             Digest digest = DigestFactory.getInstance().factory();
-            digest.setAlgorithm(DigestAlgorithmEnum.SHA_1);
-            String certSha1 = base64Codec(digest.digest(cert.getEncoded()));
-            digest = DigestFactory.getInstance().factory();
             digest.setAlgorithm(DigestAlgorithmEnum.SHA_256);
             String certSha2 = base64Codec(digest.digest(cert.getEncoded()));
             long now = System.currentTimeMillis() / 1000L;
             String headerJwt = "{" 
-                + "\"alg\":\"RS512\"," 
-                + "\"typ\":\"JWT\"" 
-                + "" + (!request.isWithCert() ? ",\"x5t\":\"" + certSha1 + "\"," : "") 
-                + "" + (!request.isWithCert() ? "\"x5t#S256\":\"" + certSha2 + "\"" : "") 
+                + "\"alg\":\"RS512\"" 
+                + ",\"typ\":\"JWT\"" 
+                + (!request.isWithCert() ? ",\"x5t#S256\":\"" + certSha2 + "\"" : "")
                 + "}";
             String bodyJwt = "{" 
-                    + "\"iss\":\"Assinador SERPRO Websocket Service\"," 
-                    + "\"iat\":" + now + ","
-                    + "\"nbf\":" + now + "," 
-                    + "\"exp\":" + (now + 3600) + "," 
-                    + "" + (request.isWithData() ? "\"sub\":\"" + bc.getName() + "\"," : "") 
-                    + "" + (request.isWithData() ? "\"cpf\":\"" + bc.getICPBRCertificatePF().getCPF() + "\"," : "") 
-                    + "" + (request.isWithData() ? "\"email\":\"" + bc.getEmail() + "\"," : "") 
-                    + "" + (request.isWithData() ? "\"nascimento\":\"" + bc.getICPBRCertificatePF().getBirthDate() + "\"," : "") 
-                    + "" + (request.getAud()!=null&&!request.getAud().trim().isEmpty() ? "\"aud\":\"" + request.getAud() + "\"," : "") 
-                    + "\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
-                    + "" + (request.isWithCert() ? ",\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"" : "") 
+                    + "\"iss\":\"Assinador SERPRO Websocket Service\"" 
+                    + ",\"iat\":" + now
+                    + ",\"nbf\":" + now 
+                    + ",\"exp\":" + (now + 3600) 
+                    + ",\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
+                    + (request.isWithData() ? ",\"sub\":\"" + bc.getName() + "\"" : "") 
+                    + (request.isWithData() ? ",\"cpf\":\"" + bc.getICPBRCertificatePF().getCPF() + "\"" : "") 
+                    + (request.isWithData() ? ",\"email\":\"" + bc.getEmail() + "\"" : "") 
+                    + (request.isWithData() ? ",\"nascimento\":\"" + bc.getICPBRCertificatePF().getBirthDate() + "\"" : "") 
+                    + (request.getAud()!=null&&!request.getAud().trim().isEmpty() ? ",\"aud\":\"" + request.getAud() + "\"" : "") 
+                    + (request.isWithCert() ? ",\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"" : "") 
                     + "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
             signer.setAlgorithm(SignerAlgorithmEnum.SHA512withRSA);
@@ -151,8 +147,10 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                 }
             } catch (ActionCanceledException cancel) {
                 this.keyStore = null;
+                logger.error("Operacao cancelada", cancel);
             } catch (CertificateException error) {
                 this.keyStore = null;
+                logger.error("Erro ao carregar KeyStore", error);
             }
         }
     }
