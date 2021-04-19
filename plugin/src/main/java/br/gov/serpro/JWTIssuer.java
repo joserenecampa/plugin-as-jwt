@@ -71,11 +71,11 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                     + "\"iat\":" + now + ","
                     + "\"nbf\":" + now + "," 
                     + "\"exp\":" + (now + 3600) + "," 
-                    + "" + (request.isWithData() ? "\"prn\":\"" + bc.getICPBRCertificatePF().getCPF() + "\"," : "") 
                     + "" + (request.isWithData() ? "\"sub\":\"" + bc.getName() + "\"," : "") 
+                    + "" + (request.isWithData() ? "\"cpf\":\"" + bc.getICPBRCertificatePF().getCPF() + "\"," : "") 
                     + "" + (request.isWithData() ? "\"email\":\"" + bc.getEmail() + "\"," : "") 
                     + "" + (request.isWithData() ? "\"nascimento\":\"" + bc.getICPBRCertificatePF().getBirthDate() + "\"," : "") 
-                    + "" + (request.isWithData()&&request.isWithCert() ? "\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
+                    + "" + (request.isWithCert() ? "\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
                     + "" + (request.getAud()!=null&&!request.getAud().trim().isEmpty() ? "\"aud\":\"" + request.getAud() + "\"," : "") 
                     + "\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
                     + "}";
@@ -85,7 +85,11 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             String toSigner = base64Codec(headerJwt.getBytes()) + "." + base64Codec(bodyJwt.getBytes());
             byte[] signatureJwt = signer.doDetachedSign(toSigner.getBytes());
             response.setJwt(toSigner + "." + base64Codec(signatureJwt));
-            response.setCertificate(base64Codec(cert.getEncoded()));
+            if (!request.isWithCert()) {
+                response.setCertificate(base64Codec(cert.getEncoded()));
+            } else {
+                response.setCertificate(null);
+            }
         } catch (Throwable error) {
             logger.error("Erro ao assinar token", error);
             response.setJwt(error.getMessage());
