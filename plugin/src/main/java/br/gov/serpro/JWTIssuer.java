@@ -47,8 +47,8 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
     public JWTResponse doCommand(JWTRequest request) throws Throwable {
         JWTIssuer.ACAO = "Emitir Web Token";
         try {
-            if (request.getHostConnected() != null && !request.getHostConnected().isEmpty()) {
-                JWTIssuer.ACAO = JWTIssuer.ACAO + " - " + request.getHostConnected();
+            if (request.getHostConnectedPrefix() != null && !request.getHostConnectedPrefix().isEmpty()) {
+                JWTIssuer.ACAO = JWTIssuer.ACAO + " - " + request.getHostConnectedPrefix();
             }
             if (request.getSys() != null && !request.getSys().isEmpty()) {
                 JWTIssuer.ACAO = JWTIssuer.ACAO + " (" + request.getSys() + ")";
@@ -70,7 +70,7 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                     + "" + (request.isWithCert() ? "\"crt\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
                     + "\"sub\":\"" + bc.getName() + "\"," 
                     + "" + (request.getSys()!=null&&!request.getSys().trim().isEmpty() ? "\"sys\":\"" + request.getSys() + "\"," : "") 
-                    + "\"host\":\"" + request.getHostConnected() + "\"" 
+                    + "\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
                     + "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
             signer.setAlgorithm(SignerAlgorithmEnum.SHA512withRSA);
