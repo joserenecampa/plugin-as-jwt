@@ -45,6 +45,7 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
 
     @Override
     public JWTResponse doCommand(JWTRequest request) throws Throwable {
+        JWTIssuer.ACAO = "Emitir Web Token";
         try {
             if (request.getHostConnected() != null && !request.getHostConnected().isEmpty()) {
                 JWTIssuer.ACAO = JWTIssuer.ACAO + " - " + request.getHostConnected();
@@ -90,26 +91,6 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
     }
 
     private void loadKeyStore() {
-        try {
-            File filep12 = new File(configSigner.getCertificateFilePath());
-            if (configSigner.isSaveCertificateFilePass()) {
-                this.pass = configSigner.getCertificateFilePass();
-            } else {
-                PinHandlerFile pinFile = new PinHandlerFile(JWTIssuer.ACAO, null);
-                pinFile.init();
-                if (!pinFile.getActionCanceled()) {
-                    this.pass = pinFile.getPwd();
-                } else {
-                    throw new RuntimeException("Cancelada pelo usuário");
-                }
-            }
-            configSigner.setLastDriverUsed(filep12.getAbsolutePath());
-            KeyStoreLoader loader = KeyStoreLoaderFactory.factoryKeyStoreLoader(filep12);
-            this.keyStore = loader.getKeyStore(String.copyValueOf(this.pass));
-        } catch (Throwable error) {
-            logger.error("Erro ao carregar KeyStore", error);
-        }
-
         if (configSigner.isUseCertificateFile() || configSigner.isChooseFileCertificate()) {
             try {
                 File filep12 = new File(configSigner.getCertificateFilePath());
