@@ -6,7 +6,7 @@ public class JWTRequest extends Request {
 
     private boolean withCert = false;
     private boolean withData = false;
-    private String sys = "";
+    private String aud = "";
 
     public boolean isWithCert() {
         return withCert;
@@ -16,12 +16,12 @@ public class JWTRequest extends Request {
         this.withCert = withCert;
     }
 
-    public String getSys() {
-        return sys;
+    public String getAud() {
+        return aud;
     }
 
-    public void setSys(String sys) {
-        this.sys = sys;
+    public void setAud(String aud) {
+        this.aud = aud;
     }
 
     public boolean isWithData() {

@@ -76,7 +76,7 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                     + "" + (request.isWithData() ? "\"email\":\"" + bc.getEmail() + "\"," : "") 
                     + "" + (request.isWithData() ? "\"nascimento\":\"" + bc.getICPBRCertificatePF().getBirthDate() + "\"," : "") 
                     + "" + (request.isWithData()&&request.isWithCert() ? "\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
-                    + "" + (request.getSys()!=null&&!request.getSys().trim().isEmpty() ? "\"sys\":\"" + request.getSys() + "\"," : "") 
+                    + "" + (request.getAud()!=null&&!request.getAud().trim().isEmpty() ? "\"aud\":\"" + request.getAud() + "\"," : "") 
                     + "\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
                     + "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
