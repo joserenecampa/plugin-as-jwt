@@ -63,7 +63,7 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             String headerJwt = "{" 
                 + "\"alg\":\"RS512\"," 
                 + "\"typ\":\"JWT\"" 
-                + "" + (!request.isWithCert() ? "\",x5t\":\"" + certSha1 + "\"," : "") 
+                + "" + (!request.isWithCert() ? ",\"x5t\":\"" + certSha1 + "\"," : "") 
                 + "" + (!request.isWithCert() ? "\"x5t#S256\":\"" + certSha2 + "\"" : "") 
                 + "}";
             String bodyJwt = "{" 
@@ -77,7 +77,7 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                     + "" + (request.isWithData() ? "\"nascimento\":\"" + bc.getICPBRCertificatePF().getBirthDate() + "\"," : "") 
                     + "" + (request.getAud()!=null&&!request.getAud().trim().isEmpty() ? "\"aud\":\"" + request.getAud() + "\"," : "") 
                     + "\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
-                    + "" + (request.isWithCert() ? "\",x5c\":\"" + base64Codec(cert.getEncoded()) + "\"" : "") 
+                    + "" + (request.isWithCert() ? ",\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"" : "") 
                     + "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
             signer.setAlgorithm(SignerAlgorithmEnum.SHA512withRSA);
