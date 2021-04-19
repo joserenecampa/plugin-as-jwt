@@ -62,8 +62,8 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             long now = System.currentTimeMillis() / 1000L;
             String headerJwt = "{" 
                 + "\"alg\":\"RS512\"," 
-                + "\"typ\":\"JWT\"," 
-                + "" + (!request.isWithCert() ? "\"x5t\":\"" + certSha1 + "\"," : "") 
+                + "\"typ\":\"JWT\"" 
+                + "," + (!request.isWithCert() ? "\"x5t\":\"" + certSha1 + "\"," : "") 
                 + "" + (!request.isWithCert() ? "\"x5t#S256\":\"" + certSha2 + "\"" : "") 
                 + "}";
             String bodyJwt = "{" 
