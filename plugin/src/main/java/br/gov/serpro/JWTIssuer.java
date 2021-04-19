@@ -63,8 +63,8 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             String headerJwt = "{" 
                 + "\"alg\":\"RS512\"," 
                 + "\"typ\":\"JWT\"," 
-                + "\"x5t\":\"" + certSha1 + "\"," 
-                + "\"x5t#S256\":\"" + certSha2 + "\"" 
+                + "" + (!request.isWithCert() ? "\"x5t\":\"" + certSha1 + "\"," : "") 
+                + "" + (!request.isWithCert() ? "\"x5t#S256\":\"" + certSha2 + "\"" : "") 
                 + "}";
             String bodyJwt = "{" 
                     + "\"iss\":\"Assinador SERPRO Websocket Service\"," 
@@ -75,8 +75,8 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
                     + "" + (request.isWithData() ? "\"cpf\":\"" + bc.getICPBRCertificatePF().getCPF() + "\"," : "") 
                     + "" + (request.isWithData() ? "\"email\":\"" + bc.getEmail() + "\"," : "") 
                     + "" + (request.isWithData() ? "\"nascimento\":\"" + bc.getICPBRCertificatePF().getBirthDate() + "\"," : "") 
-                    + "" + (request.isWithCert() ? "\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
                     + "" + (request.getAud()!=null&&!request.getAud().trim().isEmpty() ? "\"aud\":\"" + request.getAud() + "\"," : "") 
+                    + "" + (request.isWithCert() ? "\"x5c\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
                     + "\"host\":\"" + request.getHostConnectedPrefix() + "\"" 
                     + "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
