@@ -49,6 +49,9 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             if (request.getHostConnected() != null && !request.getHostConnected().isEmpty()) {
                 JWTIssuer.ACAO = JWTIssuer.ACAO + " - " + request.getHostConnected();
             }
+            if (request.getSys() != null && !request.getSys().isEmpty()) {
+                JWTIssuer.ACAO = JWTIssuer.ACAO + " (" + request.getSys() + ")";
+            }
             String alias = this.getAlias();
             X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
             BasicCertificate bc = new BasicCertificate(cert);
@@ -57,11 +60,17 @@ public class JWTIssuer extends AbstractCommand<JWTRequest, JWTResponse> {
             String certSha1 = base64Codec(digest.digest(cert.getEncoded()));
             long now = System.currentTimeMillis() / 1000L;
             String headerJwt = "{" + "\"alg\":\"RS512\"," + "\"typ\":\"JWT\"," + "\"x5t\":\"" + certSha1 + "\"" + "}";
-            String bodyJwt = "{" + "\"iss\":\"Assinador SERPRO Websocket Service\"," + "\"iat\":" + now + ","
-                    + "\"nbf\":" + now + "," + "\"exp\":" + (now + 3600) + "," + "\"prn\":\""
-                    + bc.getICPBRCertificatePF().getCPF() + "\"," + ""
-                    + (request.isWithCert() ? "\"crt\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") + "\"sub\":\""
-                    + bc.getName() + "\"," + "\"sys\":\"" + request.getHostConnected() + "\"" + "}";
+            String bodyJwt = "{" 
+                    + "\"iss\":\"Assinador SERPRO Websocket Service\"," 
+                    + "\"iat\":" + now + ","
+                    + "\"nbf\":" + now + "," 
+                    + "\"exp\":" + (now + 3600) + "," 
+                    + "\"prn\":\"" + bc.getICPBRCertificatePF().getCPF() + "\"," 
+                    + "" + (request.isWithCert() ? "\"crt\":\"" + base64Codec(cert.getEncoded()) + "\"," : "") 
+                    + "\"sub\":\"" + bc.getName() + "\"," 
+                    + "" + (!(request.getSys()!=null&&!request.getSys().isEmpty()) ? "\"sys\":\"" + request.getSys() + "\"," : "") 
+                    + "\"host\":\"" + request.getHostConnected() + "\"" 
+                    + "}";
             PKCS1Signer signer = PKCS1Factory.getInstance().factory();
             signer.setAlgorithm(SignerAlgorithmEnum.SHA512withRSA);
             signer.setPrivateKey((PrivateKey) this.keyStore.getKey(alias, this.pass));
